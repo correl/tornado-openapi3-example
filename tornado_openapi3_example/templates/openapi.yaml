@@ -1,0 +1,149 @@
+---
+openapi: "3.0.0"
+info:
+  title: Tornado OpenAPI3 Example
+  version: "1.0.0"
+  description: |
+    An example application using tornado-openapi3 to validate requests and
+    responses.
+paths:
+  /:
+    get:
+      summary: Service Root
+      tags:
+        - Documentation
+      responses:
+        '301':
+          description: Redirect to HTML documentation
+          headers:
+            Location:
+              schema:
+                type: string
+                enum:
+                  - /static/index.html
+  /static/index.html:
+    get:
+      summary: HTML Rendered OpenAPI Specification
+      tags:
+        - Documentation
+      responses:
+        '200':
+          description: HTML documentation
+          content:
+            text/html:
+              schema:
+                type: string
+  /openapi.yaml:
+    get:
+      summary: YAML OpenAPI specification
+      tags:
+        - Documentation
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+  /login:
+    post:
+      summary: Log In
+      tags:
+        - Examples
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/login'
+      responses:
+        '200':
+          description: Login successful
+        '403':
+          description: Forbidden
+  /notes:
+    post:
+      summary: Create a note
+      tags:
+        - Examples
+      security:
+        - token: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/note'
+      responses:
+        '204':
+          description: Note created
+  /notes/{id}:
+    get:
+      summary: Retrieve a note
+      tags:
+        - Examples
+      security:
+        - token: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: Note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/note'
+            text/html:
+              schema:
+                type: string
+    delete:
+      summary: Remove a note
+      tags:
+        - Examples
+      security:
+        - token: []
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: integer
+          required: true
+      responses:
+        '204':
+          description: Note deleted
+components:
+  schemas:
+    login:
+      type: object
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: correct-horse-battery-staple
+      additionalProperties: false
+      required:
+        - username
+        - password
+    note:
+      type: object
+      properties:
+        subject:
+          type: string
+          maxLength: 72
+        body:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+  securitySchemes:
+    token:
+      type: http
+      scheme: bearer
+      bearerFormat: Access token
